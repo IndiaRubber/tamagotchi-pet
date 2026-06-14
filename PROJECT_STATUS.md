@@ -540,3 +540,109 @@ Suggested commit:
 git add .
 git commit -m "Add medicine, energy treat, and accident mechanics"
 ```
+## Current Milestone: Baby Sprite Animation Pipeline
+
+The baby pet sprite system now supports multi-frame mood animations using numbered PNG frames.
+
+Active sprite path:
+
+```text
+assets/pets/baby/
+```
+
+Current naming convention:
+
+```text
+idle_0.png
+idle_1.png
+idle_2.png
+
+happy_0.png
+happy_1.png
+happy_2.png
+
+sad_0.png
+sad_1.png
+sad_2.png
+
+sick_0.png
+sick_1.png
+sick_2.png
+
+sleep_0.png
+sleep_1.png
+sleep_2.png
+
+tired_0.png
+tired_1.png
+tired_2.png
+```
+
+The sprite loader automatically loads frames in sequence until a numbered frame is missing. For example, if `idle_0.png`, `idle_1.png`, and `idle_2.png` exist, idle will animate across all three frames.
+
+## Animation System
+
+`pet/animation.py` contains the animation player.
+
+`pet/sprites.py` now loads sprites from:
+
+```text
+assets/pets/
+```
+
+and supports evolution-stage folders such as:
+
+```text
+assets/pets/baby/
+assets/pets/child/
+assets/pets/teen/
+assets/pets/adult/normal/
+assets/pets/adult/excellent/
+assets/pets/adult/rough/
+```
+
+`main.py` now uses:
+
+```python
+choose_sprite_frames()
+AnimationPlayer
+```
+
+instead of the older single-image `choose_sprite()` flow.
+
+## Background Cleanup Tools
+
+Generated sprites should preferably use a solid bright green chroma-key background.
+
+Current cleanup strategy:
+
+```text
+remove_chroma_bg.py
+```
+
+This tool scans sprite PNGs under:
+
+```text
+assets/pets/
+```
+
+and removes green/magenta chroma-key backgrounds only when the chroma color touches the image border.
+
+Older white/checkerboard cleanup is risky for Bit because Bit’s body is white. Avoid using white-background cleanup on current pet sprites unless absolutely necessary.
+
+## Recent Asset Work
+
+New 3-frame baby animation sets have been generated or are in progress for:
+
+```text
+idle
+happy
+sad
+sick
+sleep
+tired
+```
+
+Dirty animation frames were also expanded using chroma-key backgrounds to show dirt spreading over time.
+
+Next step is to save the generated images into the correct `assets/pets/baby/` filenames, run `remove_chroma_bg.py`, test in-game, then commit the milestone.

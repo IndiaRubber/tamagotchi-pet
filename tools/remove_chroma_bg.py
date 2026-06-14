@@ -3,9 +3,21 @@ from pathlib import Path
 from PIL import Image
 
 
-INPUTS = [
-    ("assets/pets/baby/happy_1.png", "assets/pets/baby/happy_1.png"),
-]
+SPRITE_ROOT = Path("assets/pets")
+
+# Chroma colors we expect from generated images.
+# Bright green is preferred.
+GREEN_THRESHOLD = {
+    "r_max": 80,
+    "g_min": 160,
+    "b_max": 120,
+}
+
+MAGENTA_THRESHOLD = {
+    "r_min": 160,
+    "g_max": 100,
+    "b_min": 160,
+}
 
 
 def is_background_like(pixel):
@@ -14,23 +26,61 @@ def is_background_like(pixel):
     if a == 0:
         return True
 
-    # Bright green chroma key
-    green_bg = g >= 180 and r <= 80 and b <= 120
+    green_bg = (
+        r <= GREEN_THRESHOLD["r_max"]
+        and g >= GREEN_THRESHOLD["g_min"]
+        and b <= GREEN_THRESHOLD["b_max"]
+    )
 
-    # Bright magenta chroma key
-    magenta_bg = r >= 180 and b >= 180 and g <= 100
+    magenta_bg = (
+        r >= MAGENTA_THRESHOLD["r_min"]
+        and g <= MAGENTA_THRESHOLD["g_max"]
+        and b >= MAGENTA_THRESHOLD["b_min"]
+    )
 
     return green_bg or magenta_bg
 
 
+def border_has_chroma_background(img):
+    """
+    Safety check:
+    Only process files that actually have chroma-key pixels on the border.
+    This prevents the script from touching normal transparent sprites.
+    """
+
+    img = img.convert("RGBA")
+    pixels = img.load()
+    width, height = img.size
+
+    for x in range(width):
+        if is_background_like(pixels[x, 0]):
+            return True
+        if is_background_like(pixels[x, height - 1]):
+            return True
+
+    for y in range(height):
+        if is_background_like(pixels[0, y]):
+            return True
+        if is_background_like(pixels[width - 1, y]):
+            return True
+
+    return False
+
+
 def remove_connected_background(input_path, output_path):
     img = Image.open(input_path).convert("RGBA")
+
+    if not border_has_chroma_background(img):
+        print(f"Skipped, no chroma border: {input_path}")
+        return
+
     pixels = img.load()
     width, height = img.size
 
     visited = set()
     queue = deque()
 
+    # Start flood fill from image borders only.
     for x in range(width):
         queue.append((x, 0))
         queue.append((x, height - 1))
@@ -62,15 +112,23 @@ def remove_connected_background(input_path, output_path):
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     img.save(output_path)
-    print(f"Saved: {output_path}")
+    print(f"Cleaned: {output_path}")
 
 
-for input_file, output_file in INPUTS:
-    input_path = Path(input_file)
-    output_path = Path(output_file)
+def main():
+    if not SPRITE_ROOT.exists():
+        print(f"Missing sprite folder: {SPRITE_ROOT}")
+        return
 
-    if not input_path.exists():
-        print(f"Missing: {input_path}")
-        continue
+    png_files = sorted(SPRITE_ROOT.rglob("*.png"))
 
-    remove_connected_background(input_path, output_path)
+    if not png_files:
+        print(f"No PNG files found under: {SPRITE_ROOT}")
+        return
+
+    for input_path in png_files:
+        remove_connected_background(input_path, input_path)
+
+
+if __name__ == "__main__":
+    main()
