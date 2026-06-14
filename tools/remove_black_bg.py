@@ -4,16 +4,11 @@ from PIL import Image
 
 
 INPUTS = [
-    ("assets/pets/baby/idle_0.png", "assets/pets/baby/idle_0.png"),
-    ("assets/pets/baby/happy_0.png", "assets/pets/baby/happy_0.png"),
-    ("assets/pets/baby/happy_1.png", "assets/pets/baby/happy_1.png"),
-    ("assets/pets/baby/sleep_0.png", "assets/pets/baby/sleep_0.png"),
-    ("assets/pets/baby/hungry_0.png", "assets/pets/baby/hungry_0.png"),
-    ("assets/pets/baby/dirty_0.png", "assets/pets/baby/dirty_0.png"),
-    ("assets/pets/baby/tired_0.png", "assets/pets/baby/tired_0.png"),
-    ("assets/pets/baby/sad_0.png", "assets/pets/baby/sad_0.png"),
-    ("assets/pets/baby/sick_0.png", "assets/pets/baby/sick_0.png"),
+    ("assets/pets/baby/idle_1.png", "assets/pets/baby/idle_1.png"),
 ]
+
+
+BLACK_THRESHOLD = 12
 
 
 def is_background_like(pixel):
@@ -22,9 +17,7 @@ def is_background_like(pixel):
     if a == 0:
         return True
 
-    # Checkerboard / near-white background only.
-    # Flood fill from borders keeps it from eating enclosed white body pixels.
-    return r >= 215 and g >= 215 and b >= 215
+    return r <= BLACK_THRESHOLD and g <= BLACK_THRESHOLD and b <= BLACK_THRESHOLD
 
 
 def remove_connected_background(input_path, output_path):

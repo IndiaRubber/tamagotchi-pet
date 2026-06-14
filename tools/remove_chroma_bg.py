@@ -4,15 +4,7 @@ from PIL import Image
 
 
 INPUTS = [
-    ("assets/pets/baby/idle_0.png", "assets/pets/baby/idle_0.png"),
-    ("assets/pets/baby/happy_0.png", "assets/pets/baby/happy_0.png"),
     ("assets/pets/baby/happy_1.png", "assets/pets/baby/happy_1.png"),
-    ("assets/pets/baby/sleep_0.png", "assets/pets/baby/sleep_0.png"),
-    ("assets/pets/baby/hungry_0.png", "assets/pets/baby/hungry_0.png"),
-    ("assets/pets/baby/dirty_0.png", "assets/pets/baby/dirty_0.png"),
-    ("assets/pets/baby/tired_0.png", "assets/pets/baby/tired_0.png"),
-    ("assets/pets/baby/sad_0.png", "assets/pets/baby/sad_0.png"),
-    ("assets/pets/baby/sick_0.png", "assets/pets/baby/sick_0.png"),
 ]
 
 
@@ -22,9 +14,13 @@ def is_background_like(pixel):
     if a == 0:
         return True
 
-    # Checkerboard / near-white background only.
-    # Flood fill from borders keeps it from eating enclosed white body pixels.
-    return r >= 215 and g >= 215 and b >= 215
+    # Bright green chroma key
+    green_bg = g >= 180 and r <= 80 and b <= 120
+
+    # Bright magenta chroma key
+    magenta_bg = r >= 180 and b >= 180 and g <= 100
+
+    return green_bg or magenta_bg
 
 
 def remove_connected_background(input_path, output_path):
@@ -35,7 +31,6 @@ def remove_connected_background(input_path, output_path):
     visited = set()
     queue = deque()
 
-    # Start flood fill from image borders only.
     for x in range(width):
         queue.append((x, 0))
         queue.append((x, height - 1))
