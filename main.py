@@ -37,7 +37,12 @@ from pet.mood import get_mood, get_mood_label, get_mood_message
 from pet.sounds import SoundManager
 
 
-def create_io():
+def create_io(whisplay_display=None):
+    if whisplay_display:
+        from io_layer.whisplay_io import WhisplayIO
+
+        return WhisplayIO(whisplay_display.board)
+
     return WindowsIO()
 
 
@@ -117,7 +122,7 @@ def main():
     font = pygame.font.SysFont("consolas", 18)
     small_font = pygame.font.SysFont("consolas", 12)
 
-    io = create_io()
+    io = create_io(whisplay_display)
     pet = load_pet()
     apply_offline_progress(pet)
 
