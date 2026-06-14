@@ -4,7 +4,7 @@ import time
 
 
 class AnimationPlayer:
-    def __init__(self, frame_duration=0.45):
+    def __init__(self, frame_duration=0.35):
         self.frame_duration = frame_duration
         self.current_key = None
         self.frame_index = 0
