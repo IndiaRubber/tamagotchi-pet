@@ -234,11 +234,12 @@ def main():
         
         if whisplay_display:
             now = time.time()
+            
             if now - last_whisplay_flip >= 1 / WHISPLAY_FPS:
                 whisplay_display.flip(screen)
                 last_whisplay_flip = now
-            else:
-                pygame.display.flip()
+        else:
+            pygame.display.flip()
 
     save_pet(pet)
 
