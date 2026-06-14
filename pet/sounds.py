@@ -1,11 +1,10 @@
 import math
 import wave
 from array import array
-from pathlib import Path
+from pet.paths import SOUND_DIR
 
 import pygame
 
-SOUND_DIR = Path("assets/sounds")
 SAMPLE_RATE = 44100
 
 
@@ -101,7 +100,11 @@ class SoundManager:
             "treat",
         ]:
             path = SOUND_DIR / f"{name}.wav"
-            self.sounds[name] = pygame.mixer.Sound(str(path))
+
+            if path.exists():
+                self.sounds[name] = pygame.mixer.Sound(str(path))
+            else:
+                print(f"Missing sound: {path}")
 
     def play(self, name):
         if not self.enabled:

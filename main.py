@@ -17,6 +17,9 @@ from pet.sprites import load_sprites, choose_sprite
 from io_layer.windows_io import WindowsIO
 from pet.mood import get_mood, get_mood_label, get_mood_message
 
+def create_io():
+    return WindowsIO()
+
 SCREEN_WIDTH = 240
 SCREEN_HEIGHT = 280
 FPS = 30
@@ -191,7 +194,7 @@ def main():
     font = pygame.font.SysFont("consolas", 18)
     small_font = pygame.font.SysFont("consolas", 12)
 
-    io = WindowsIO()
+    io = create_io()
     pet = load_pet()
     apply_offline_progress(pet)
 

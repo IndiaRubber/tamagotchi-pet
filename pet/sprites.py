@@ -1,9 +1,9 @@
 import pygame
-from pathlib import Path
+from pet.paths import ASSET_DIR
 
 from pet.mood import get_mood
 
-ASSET_DIR = Path("assets")
+
 
 SPRITE_FILES = {
     "idle": "pet_idle.png",

@@ -1,8 +1,9 @@
 import json
-from pathlib import Path
-from pet.state import PetState
+from datetime import datetime, timezone
 
-SAVE_FILE = Path("save.json")
+from pet.mood import get_mood
+from pet.paths import SAVE_FILE
+from pet.state import PetState
 
 
 def load_pet():

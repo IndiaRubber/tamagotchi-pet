@@ -2,8 +2,6 @@ from datetime import datetime, timezone
 from pet.mood import get_mood
 from pet.state import PetState
 
-import pet
-
 MESS_INTERVAL_SECONDS = 10
 PEE_INTERVAL_SECONDS = 8
 MAX_MESS_COUNT = 3
