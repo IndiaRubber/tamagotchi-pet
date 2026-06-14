@@ -21,9 +21,13 @@ MOODS = [
 
 
 def load_image(path):
-    image = pygame.image.load(path).convert_alpha()
+    image = pygame.image.load(path)
 
-    # Use scale, not smoothscale, to keep pixel-art edges crisp.
+    try:
+        image = image.convert_alpha()
+    except pygame.error:
+        image = image.copy()
+
     image = pygame.transform.scale(image, SPRITE_SIZE)
 
     return image
