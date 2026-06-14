@@ -3,7 +3,6 @@ import platform
 import pygame
 import time
 
-from io_layer import whisplay_display
 from io_layer.windows_io import WindowsIO
 
 from pet.config import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_SIZE, FPS
@@ -63,7 +62,7 @@ def create_display():
         screen = pygame.Surface(SCREEN_SIZE)
         return screen, display
 
-    screen, whisplay_display = create_display()
+    screen = pygame.display.set_mode(SCREEN_SIZE)
     return screen, None
 
 def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, selected_menu_index, debug_mood=None):
