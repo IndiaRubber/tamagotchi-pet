@@ -3,6 +3,7 @@ import sys
 
 from PIL import Image
 
+from pet.config import WHISPLAY_BACKLIGHT
 
 def add_whisplay_runtime_to_path():
     """
@@ -33,7 +34,7 @@ class WhisplayDisplay:
             use_daemon_default_log=True,
         )
 
-        self.board.set_backlight(100)
+        self.board.set_backlight(WHISPLAY_BACKLIGHT)
 
         self.width = self.board.LCD_WIDTH
         self.height = self.board.LCD_HEIGHT
