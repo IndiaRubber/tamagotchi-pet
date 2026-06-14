@@ -33,7 +33,7 @@ class WhisplayDisplay:
             use_daemon_default_log=True,
         )
 
-        self.board.set_backlight(70)
+        self.board.set_backlight(100)
 
         self.width = self.board.LCD_WIDTH
         self.height = self.board.LCD_HEIGHT

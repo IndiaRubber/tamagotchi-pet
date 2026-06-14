@@ -239,8 +239,8 @@ def main():
             now = time.time()
 
             # Force an occasional refresh so slow stat changes eventually show.
-            if now - last_whisplay_refresh >= 10:
-                screen_dirty = True
+            # if now - last_whisplay_refresh >= 10:
+            #     screen_dirty = True
 
             if screen_dirty:
                 draw_ui(
