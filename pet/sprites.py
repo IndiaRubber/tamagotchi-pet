@@ -21,8 +21,12 @@ MOODS = [
 
 
 def load_image(path):
-    image = pygame.image.load(path).convert_alpha()
-    return pygame.transform.scale(image, SPRITE_SIZE)
+    image = pygame.image.load(str(path))
+
+    try:
+        return image.convert_alpha()
+    except pygame.error:
+        return image.copy()
 
 
 def load_animation_frames(folder, animation_name):
