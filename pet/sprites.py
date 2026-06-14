@@ -17,19 +17,27 @@ SPRITE_FILES = {
 }
 
 
+def load_image_with_alpha(path):
+    image = pygame.image.load(str(path))
+
+    try:
+        return image.convert_alpha()
+    except pygame.error:
+        return image.copy()
+
+
 def load_sprite(filename, size=(96, 96)):
     path = ASSET_DIR / filename
 
     if path.exists():
         try:
-            image = pygame.image.load(str(path)).convert_alpha()
+            image = load_image_with_alpha(path)
             return pygame.transform.scale(image, size)
         except Exception as error:
             print(f"Could not load sprite {filename}: {error}")
             return None
 
     return None
-
 
 def create_placeholder_pet(size=(96, 96)):
     surface = pygame.Surface(size, pygame.SRCALPHA)
