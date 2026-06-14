@@ -136,12 +136,16 @@ def main():
     debug_mood_index = None
 
     last_save = time.time()
-    last_whisplay_flip = 0
+    last_whisplay_refresh = 0
+    screen_dirty = True
 
     while io.running:
         dt = clock.tick(FPS) / 1000.0
 
         actions = io.poll_events()
+        
+        if actions:
+            screen_dirty = True
 
         for action in actions:
             if action == "menu_up":
@@ -197,6 +201,8 @@ def main():
                     message_timer = 3.0
 
         pet_events = update_pet(pet, dt) or []
+        if pet_events:
+            screen_dirty = True
 
         for event in pet_events:
             if event == "mess_created":
@@ -211,8 +217,13 @@ def main():
 
         selected_menu_index %= len(get_menu_options(pet))
 
+        message_was_visible = message_timer > 0
+
         if message_timer > 0:
             message_timer -= dt
+
+        if message_was_visible and message_timer <= 0:
+            screen_dirty = True
 
         if time.time() - last_save > 5:
             save_pet(pet)
@@ -220,27 +231,45 @@ def main():
 
         debug_mood = DEBUG_MOODS[debug_mood_index] if debug_mood_index is not None else None
 
-        draw_ui(
-            screen,
-            font,
-            small_font,
-            pet,
-            sprites,
-            message,
-            message_timer,
-            selected_menu_index,
-            debug_mood,
-        )
-        
         if whisplay_display:
             now = time.time()
-            
-            if now - last_whisplay_flip >= 1 / WHISPLAY_FPS:
-                whisplay_display.flip(screen)
-                last_whisplay_flip = now
-        else:
-            pygame.display.flip()
 
+            # Force an occasional refresh so slow stat changes eventually show.
+            if now - last_whisplay_refresh >= 10:
+                screen_dirty = True
+
+            if screen_dirty:
+                draw_ui(
+                    screen,
+                    font,
+                    small_font,
+                    pet,
+                    sprites,
+                    message,
+                    message_timer,
+                    selected_menu_index,
+                    debug_mood,
+                )
+
+                whisplay_display.flip(screen)
+                last_whisplay_refresh = now
+                screen_dirty = False
+
+        else:
+            draw_ui(
+                screen,
+                font,
+                small_font,
+                pet,
+                sprites,
+                message,
+                message_timer,
+                selected_menu_index,
+                debug_mood,
+            )
+
+            pygame.display.flip()
+            
     save_pet(pet)
 
     if whisplay_display:
