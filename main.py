@@ -5,7 +5,7 @@ import time
 
 from io_layer.windows_io import WindowsIO
 
-from pet.config import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_SIZE, FPS, WHISPLAY_FPS
+from pet.config import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_SIZE, FPS, WHISPLAY_FPS, WHISPLAY_ANIMATIONS
 from pet.save import load_pet, save_pet
 from pet.logic import (
     apply_offline_progress,
@@ -70,7 +70,7 @@ def create_display():
     screen = pygame.display.set_mode(SCREEN_SIZE)
     return screen, None
 
-def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, selected_menu_index, debug_mood=None):
+def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, selected_menu_index, debug_mood=None, animate=True):
     screen.fill(BG)
 
     pygame.draw.rect(screen, PANEL, (8, 8, 224, 264), border_radius=12)
@@ -81,7 +81,11 @@ def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, sele
     status = get_mood_label(mood)
     draw_text(screen, small_font, status, 164, 20, DIM)
 
-    sprite_name = choose_sprite(pet, message_timer, debug_mood)
+    if animate:
+        sprite_name = choose_sprite(pet, message_timer, debug_mood)
+    else:
+        sprite_name = choose_sprite(pet, 0, debug_mood)
+        
     sprite = sprites[sprite_name]
 
     sprite_rect = sprite.get_rect(center=(120, 82))
@@ -249,6 +253,7 @@ def main():
                     message_timer,
                     selected_menu_index,
                     debug_mood,
+                    animate=WHISPLAY_ANIMATIONS,
                 )
 
                 whisplay_display.flip(screen)
