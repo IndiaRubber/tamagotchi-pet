@@ -1,6 +1,9 @@
+import os
+import platform
 import pygame
 import time
 
+from io_layer import whisplay_display
 from io_layer.windows_io import WindowsIO
 
 from pet.config import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_SIZE, FPS
@@ -52,6 +55,16 @@ DEBUG_MOODS = [
     "asleep",
 ]
 
+def create_display():
+    if platform.system() == "Linux" and os.path.exists(os.path.expanduser("~/Whisplay/runtime")):
+        from io_layer.whisplay_display import WhisplayDisplay
+
+        display = WhisplayDisplay()
+        screen = pygame.Surface(SCREEN_SIZE)
+        return screen, display
+
+    screen, whisplay_display = create_display()
+    return screen, None
 
 def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, selected_menu_index, debug_mood=None):
     screen.fill(BG)
@@ -214,9 +227,16 @@ def main():
             debug_mood,
         )
         
-        pygame.display.flip()
+        if whisplay_display:
+            whisplay_display.flip(screen)
+        else:
+            pygame.display.flip()
 
     save_pet(pet)
+
+    if whisplay_display:
+        whisplay_display.cleanup()
+
     pygame.quit()
 
 
