@@ -111,7 +111,7 @@ def main():
     pygame.init()
     pygame.display.set_caption("Tamagotchi Pi Prototype")
 
-    screen = pygame.display.set_mode(SCREEN_SIZE)
+    screen, whisplay_display = create_display()
     clock = pygame.time.Clock()
 
     font = pygame.font.SysFont("consolas", 18)
