@@ -250,7 +250,7 @@ def main():
             # if now - last_whisplay_refresh >= 10:
             #     screen_dirty = True
 
-            if screen_dirty:
+            if screen_dirty or (WHISPLAY_ANIMATIONS and now - last_whisplay_refresh >= 1 / WHISPLAY_FPS):
                 draw_ui(
                     screen,
                     font,
