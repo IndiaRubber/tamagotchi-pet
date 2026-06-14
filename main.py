@@ -1,7 +1,9 @@
 import pygame
 import time
-from pet.sounds import SoundManager
 
+from io_layer.windows_io import WindowsIO
+
+from pet.config import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_SIZE, FPS
 from pet.save import load_pet, save_pet
 from pet.logic import (
     apply_offline_progress,
@@ -13,16 +15,30 @@ from pet.logic import (
     energy_treat_pet,
     toggle_sleep,
 )
+
+from pet.ui import (
+    BG,
+    PANEL,
+    TEXT,
+    DIM,
+    get_menu_options,
+    draw_text,
+    draw_bar,
+    draw_mess,
+    draw_pee,
+    draw_menu,
+    get_selected_action,
+)
+
 from pet.sprites import load_sprites, choose_sprite
-from io_layer.windows_io import WindowsIO
 from pet.mood import get_mood, get_mood_label, get_mood_message
+from pet.sounds import SoundManager
+
 
 def create_io():
     return WindowsIO()
 
-SCREEN_WIDTH = 240
-SCREEN_HEIGHT = 280
-FPS = 30
+
 
 
 DEBUG_MOODS = [
@@ -36,92 +52,6 @@ DEBUG_MOODS = [
     "asleep",
 ]
 
-BG = (18, 22, 28)
-PANEL = (32, 38, 48)
-TEXT = (230, 230, 230)
-DIM = (150, 160, 170)
-BAR_BACK = (60, 65, 75)
-BAR_FILL = (180, 220, 180)
-WARNING = (240, 190, 80)
-DANGER = (240, 110, 110)
-
-def get_menu_options(pet):
-    sleep_label = "Wake" if pet.asleep else "Sleep"
-
-    options = [
-        ("Feed", "feed"),
-        ("Play", "play"),
-        ("Clean", "clean"),
-        (sleep_label, "sleep"),
-    ]
-    
-    if not pet.asleep and pet.energy < 60:
-        options.append(("Treat", "energy_treat"))
-    if not pet.asleep and pet.health < 75:
-        options.append(("Meds", "medicine"))
-
-    return options
-
-def draw_text(screen, font, text, x, y, color=TEXT):
-    image = font.render(text, True, color)
-    screen.blit(image, (x, y))
-
-
-def draw_bar(screen, font, label, value, x, y):
-    draw_text(screen, font, label, x, y, DIM)
-
-    bar_x = x + 72
-    bar_y = y + 3
-    bar_w = 120
-    bar_h = 9
-
-    pygame.draw.rect(screen, BAR_BACK, (bar_x, bar_y, bar_w, bar_h), border_radius=3)
-
-    fill_w = int(bar_w * (value / 100))
-
-    if value < 20:
-        color = DANGER
-    elif value < 45:
-        color = WARNING
-    else:
-        color = BAR_FILL
-
-    pygame.draw.rect(screen, color, (bar_x, bar_y, fill_w, bar_h), border_radius=3)
-
-def draw_mess(screen, count):
-    poop_color = (110, 75, 45)
-    poop_dark = (70, 45, 30)
-
-    positions = [
-        (48, 116),
-        (120, 118),
-        (190, 116),
-    ]
-
-    for index in range(count):
-        x, y = positions[index]
-
-        pygame.draw.ellipse(screen, poop_color, (x, y + 8, 18, 8))
-        pygame.draw.ellipse(screen, poop_color, (x + 3, y + 3, 12, 8))
-        pygame.draw.ellipse(screen, poop_color, (x + 7, y, 6, 6))
-        pygame.draw.circle(screen, poop_dark, (x + 5, y + 11), 1)
-        pygame.draw.circle(screen, poop_dark, (x + 12, y + 10), 1)
-
-def draw_pee(screen, count):
-    pee_color = (210, 190, 70)
-    pee_light = (235, 220, 110)
-
-    positions = [
-        (34, 124),
-        (104, 124),
-        (174, 124),
-    ]
-
-    for index in range(count):
-        x, y = positions[index]
-
-        pygame.draw.ellipse(screen, pee_color, (x, y, 24, 8))
-        pygame.draw.ellipse(screen, pee_light, (x + 5, y + 2, 8, 2))
 
 def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, selected_menu_index, debug_mood=None):
     screen.fill(BG)
@@ -145,32 +75,13 @@ def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, sele
     
     screen.blit(sprite, sprite_rect)
     
-
-
     draw_bar(screen, small_font, "Hunger", pet.hunger, 18, 132)
     draw_bar(screen, small_font, "Happy", pet.happiness, 18, 151)
     draw_bar(screen, small_font, "Clean", pet.cleanliness, 18, 170)
     draw_bar(screen, small_font, "Energy", pet.energy, 18, 189)
     draw_bar(screen, small_font, "Health", pet.health, 18, 208)
 
-    # Menu area
-    menu_y = 226
-    menu_x_left = 28
-    menu_x_right = 142
-
-    menu_options = get_menu_options(pet)
-
-    for index, (label, action) in enumerate(menu_options):
-        row = index // 2
-        col = index % 2
-
-        x = menu_x_left if col == 0 else menu_x_right
-        y = menu_y + row * 11
-
-        prefix = ">" if index == selected_menu_index else " "
-        color = TEXT if index == selected_menu_index else DIM
-
-        draw_text(screen, small_font, f"{prefix}{label}", x, y, color)
+    draw_menu(screen, font, small_font, pet, selected_menu_index)
         
     # Message / mood line
     message_box_y = 258
@@ -188,7 +99,7 @@ def main():
     pygame.init()
     pygame.display.set_caption("Tamagotchi Pi Prototype")
 
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode(SCREEN_SIZE)
     clock = pygame.time.Clock()
 
     font = pygame.font.SysFont("consolas", 18)
@@ -233,7 +144,7 @@ def main():
                 message_timer = 1.5
 
             elif action == "select":
-                selected_action = get_menu_options(pet)[selected_menu_index][1]
+                selected_action = get_selected_action(pet, selected_menu_index)
                 sounds.play("select")
 
                 if selected_action == "feed":

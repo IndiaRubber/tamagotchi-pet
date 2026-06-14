@@ -1,2 +1,2 @@
-#Python 3.12 recommended
+# Python 3.12 recommended
 pygame==2.6.1
