@@ -15,6 +15,7 @@ class PetState:
     time_since_last_mess: float = 0.0
     pee_count: int = 0
     time_since_last_pee: float = 0.0
+    age_minutes: float = 0.0
     last_seen: str = ""
     
 
