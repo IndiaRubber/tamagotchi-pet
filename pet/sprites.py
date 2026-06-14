@@ -1,102 +1,117 @@
+# pet/sprites.py
+
+import os
 import pygame
-from pet.paths import ASSET_DIR
 
-from pet.mood import get_mood
-
+from pet.evolution import get_evolution_stage, get_evolution_modifier
 
 
-SPRITE_FILES = {
-    "idle": "pet_idle.png",
-    "happy": "pet_happy.png",
-    "hungry": "pet_hungry.png",
-    "dirty": "pet_dirty.png",
-    "tired": "pet_tired.png",
-    "sad": "pet_sad.png",
-    "sick": "pet_sick.png",
-    "asleep": "pet_sleep.png",
-}
+SPRITE_SIZE = (128, 128)
+
+MOODS = [
+    "idle",
+    "happy",
+    "hungry",
+    "dirty",
+    "tired",
+    "sad",
+    "sick",
+    "sleep",
+]
 
 
-def load_image_with_alpha(path):
-    image = pygame.image.load(str(path))
-
-    try:
-        return image.convert_alpha()
-    except pygame.error:
-        return image.copy()
+def load_image(path):
+    image = pygame.image.load(path).convert_alpha()
+    return pygame.transform.scale(image, SPRITE_SIZE)
 
 
-def load_sprite(filename, size=(96, 96)):
-    path = ASSET_DIR / filename
+def load_animation_frames(folder, animation_name):
+    frames = []
+    frame_number = 0
 
-    if path.exists():
-        try:
-            image = load_image_with_alpha(path)
-            return pygame.transform.scale(image, size)
-        except Exception as error:
-            print(f"Could not load sprite {filename}: {error}")
-            return None
+    while True:
+        filename = f"{animation_name}_{frame_number}.png"
+        path = os.path.join(folder, filename)
 
-    return None
+        if not os.path.exists(path):
+            break
 
-def create_placeholder_pet(size=(96, 96)):
-    surface = pygame.Surface(size, pygame.SRCALPHA)
-    w, h = size
+        frames.append(load_image(path))
+        frame_number += 1
 
-    # Body
-    pygame.draw.ellipse(surface, (230, 230, 230), (12, 18, w - 24, h - 28))
-
-    # Ears / nubs
-    pygame.draw.circle(surface, (230, 230, 230), (26, 24), 12)
-    pygame.draw.circle(surface, (230, 230, 230), (w - 26, 24), 12)
-
-    # Eyes
-    pygame.draw.circle(surface, (0, 0, 0), (w // 2 - 18, h // 2 - 8), 5)
-    pygame.draw.circle(surface, (0, 0, 0), (w // 2 + 18, h // 2 - 8), 5)
-
-    # Mouth
-    pygame.draw.arc(surface, (0, 0, 0), (w // 2 - 18, h // 2 - 2, 36, 24), 0, 3.14, 2)
-
-    # Feet
-    pygame.draw.ellipse(surface, (210, 210, 210), (22, h - 22, 20, 10))
-    pygame.draw.ellipse(surface, (210, 210, 210), (w - 42, h - 22, 20, 10))
-
-    return surface
-
-
-def create_sleep_placeholder(size=(96, 96)):
-    surface = create_placeholder_pet(size)
-    w, h = size
-
-    # Cover the happy eyes with sleepy lines
-    pygame.draw.rect(surface, (230, 230, 230), (w // 2 - 26, h // 2 - 16, 52, 18))
-    pygame.draw.line(surface, (0, 0, 0), (w // 2 - 24, h // 2 - 8), (w // 2 - 12, h // 2 - 8), 2)
-    pygame.draw.line(surface, (0, 0, 0), (w // 2 + 12, h // 2 - 8), (w // 2 + 24, h // 2 - 8), 2)
-
-    return surface
+    return frames
 
 
 def load_sprites():
     sprites = {}
 
-    for mood, filename in SPRITE_FILES.items():
-        sprite = load_sprite(filename)
+    base_dir = os.path.join("assets", "pets")
 
-        if sprite is None:
-            if mood == "asleep":
-                sprites[mood] = create_sleep_placeholder()
-            else:
-                sprites[mood] = create_placeholder_pet()
-        else:
-            sprites[mood] = sprite
+    for stage in ["egg", "baby", "child", "teen"]:
+        stage_dir = os.path.join(base_dir, stage)
+
+        if not os.path.isdir(stage_dir):
+            continue
+
+        sprites[stage] = {}
+
+        for mood in MOODS:
+            frames = load_animation_frames(stage_dir, mood)
+
+            if frames:
+                sprites[stage][mood] = frames
+
+    adult_dir = os.path.join(base_dir, "adult")
+
+    if os.path.isdir(adult_dir):
+        sprites["adult"] = {}
+
+        for form in ["excellent", "normal", "rough"]:
+            form_dir = os.path.join(adult_dir, form)
+
+            if not os.path.isdir(form_dir):
+                continue
+
+            sprites["adult"][form] = {}
+
+            for mood in MOODS:
+                frames = load_animation_frames(form_dir, mood)
+
+                if frames:
+                    sprites["adult"][form][mood] = frames
 
     return sprites
 
 
-def choose_sprite(pet, message_timer, debug_mood=None):
-    mood = debug_mood or get_mood(pet)
+def choose_sprite_frames(pet, sprites, mood):
+    stage = get_evolution_stage(pet).value
 
-    if mood in SPRITE_FILES:
-        return mood
+    if mood == "asleep":
+        mood = "sleep"
 
-    return "idle"
+    if stage == "adult":
+        form = get_evolution_modifier(pet)
+
+        adult_sprites = sprites.get("adult", {})
+        form_sprites = adult_sprites.get(form, {})
+        normal_sprites = adult_sprites.get("normal", {})
+
+        return (
+            form_sprites.get(mood)
+            or form_sprites.get("idle")
+            or normal_sprites.get(mood)
+            or normal_sprites.get("idle")
+            or sprites.get("baby", {}).get(mood)
+            or sprites.get("baby", {}).get("idle")
+            or []
+        )
+
+    stage_sprites = sprites.get(stage, {})
+
+    return (
+        stage_sprites.get(mood)
+        or stage_sprites.get("idle")
+        or sprites.get("baby", {}).get(mood)
+        or sprites.get("baby", {}).get("idle")
+        or []
+    )

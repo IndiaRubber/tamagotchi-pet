@@ -30,7 +30,7 @@ def apply_offline_progress(pet):
 
 def update_pet(pet, dt):
     events = []
-    
+    pet.age_minutes += dt / 60
     if pet.asleep:
         pet.energy += 20.0 * dt / 60
         pet.hunger -= 0.8 * dt / 60
@@ -98,7 +98,7 @@ def update_pet(pet, dt):
     mood = get_mood(pet)
 
     if mood == "sick":
-        pet.health -= 30.0 * dt / 30
+        pet.health -= 30.0 * dt / 60
 
     well_cared_for = (
         pet.hunger > 50
@@ -114,6 +114,7 @@ def update_pet(pet, dt):
             pet.health += 3.0 * dt / 60
 
     pet.clamp()
+
     return events
 
 def feed_pet(pet):

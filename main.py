@@ -32,7 +32,8 @@ from pet.ui import (
     get_selected_action,
 )
 
-from pet.sprites import load_sprites, choose_sprite
+from pet.animation import AnimationPlayer
+from pet.sprites import load_sprites, choose_sprite_frames
 from pet.mood import get_mood, get_mood_label, get_mood_message
 from pet.sounds import SoundManager
 
@@ -70,7 +71,7 @@ def create_display():
     screen = pygame.display.set_mode(SCREEN_SIZE)
     return screen, None
 
-def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, selected_menu_index, debug_mood=None, animate=True):
+def draw_ui(screen, font, small_font, pet, sprites, animation_player, message, message_timer, selected_menu_index, debug_mood=None, animate=True):
     screen.fill(BG)
 
     pygame.draw.rect(screen, PANEL, (8, 8, 224, 264), border_radius=12)
@@ -81,20 +82,25 @@ def draw_ui(screen, font, small_font, pet, sprites, message, message_timer, sele
     status = get_mood_label(mood)
     draw_text(screen, small_font, status, 164, 20, DIM)
 
-    if animate:
-        sprite_name = choose_sprite(pet, message_timer, debug_mood)
-    else:
-        sprite_name = choose_sprite(pet, 0, debug_mood)
-        
-    sprite = sprites[sprite_name]
+    mood = debug_mood or get_mood(pet)
 
-    sprite_rect = sprite.get_rect(center=(120, 82))
+    frames = choose_sprite_frames(pet, sprites, mood)
+
+    if animate:
+        animation_key = mood
+        sprite = animation_player.get_frame(animation_key, frames)
+    else:
+        sprite = frames[0] if frames else None
+
+    if sprite:
+        sprite_rect = sprite.get_rect(center=(120, 82))
     
 
     draw_pee(screen, pet.pee_count)
     draw_mess(screen, pet.mess_count)
     
-    screen.blit(sprite, sprite_rect)
+    if sprite:
+        screen.blit(sprite, sprite_rect)
     
     draw_bar(screen, small_font, "Hunger", pet.hunger, 18, 132)
     draw_bar(screen, small_font, "Happy", pet.happiness, 18, 151)
@@ -131,7 +137,9 @@ def main():
     apply_offline_progress(pet)
 
     sprites = load_sprites()
+    animation_player = AnimationPlayer(frame_duration=0.35)
     sounds = SoundManager()
+    
 
     message = "Bit has booted."
     message_timer = 1.5
@@ -249,6 +257,7 @@ def main():
                     small_font,
                     pet,
                     sprites,
+                    animation_player,
                     message,
                     message_timer,
                     selected_menu_index,
@@ -267,6 +276,7 @@ def main():
                 small_font,
                 pet,
                 sprites,
+                animation_player,
                 message,
                 message_timer,
                 selected_menu_index,

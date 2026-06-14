@@ -3,14 +3,15 @@ from pathlib import Path
 from PIL import Image
 
 INPUTS = [
-    ("assets/pet_idle.png", "assets/cleaned/pet_idle.png"),
-    ("assets/pet_happy.png", "assets/cleaned/pet_happy.png"),
-    ("assets/pet_sleep.png", "assets/cleaned/pet_sleep.png"),
-    ("assets/pet_hungry.png", "assets/cleaned/pet_hungry.png"),
-    ("assets/pet_dirty.png", "assets/cleaned/pet_dirty.png"),
-    ("assets/pet_tired.png", "assets/cleaned/pet_tired.png"),
-    ("assets/pet_sad.png", "assets/cleaned/pet_sad.png"),
-    ("assets/pet_sick.png", "assets/cleaned/pet_sick.png"),
+    ("assets/pets/baby/idle_0.png", "assets/pets/baby/idle_0.png"),
+    ("assets/pets/baby/idle_1.png", "assets/pets/baby/idle_1.png"),
+    ("assets/pets/baby/happy_0.png", "assets/pets/baby/happy_0.png"),
+    ("assets/pets/baby/sleep_0.png", "assets/pets/baby/sleep_0.png"),
+    ("assets/pets/baby/hungry_0.png", "assets/pets/baby/hungry_0.png"),
+    ("assets/pets/baby/dirty_0.png", "assets/pets/baby/dirty_0.png"),
+    ("assets/pets/baby/tired_0.png", "assets/pets/baby/tired_0.png"),
+    ("assets/pets/baby/sad_0.png", "assets/pets/baby/sad_0.png"),
+    ("assets/pets/baby/sick_0.png", "assets/pets/baby/sick_0.png"),
 ]
 
 
