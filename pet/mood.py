@@ -6,7 +6,6 @@ def get_mood(pet):
 
     total_accidents = pet.mess_count + pet.pee_count
 
-# Accident-based moods
     if total_accidents >= 5:
         problems.append(("sick", 95))
     elif total_accidents >= 4:
@@ -14,21 +13,20 @@ def get_mood(pet):
     elif total_accidents >= 2:
         problems.append(("dirty", 75))
 
-    # Stat-based moods
-    if pet.health <= 25:
-        problems.append(("sick", 100 - pet.health + 40))
+    if pet.health <= 35:
+        problems.append(("sick", 100 - pet.health + 50))
 
-    if pet.hunger <= 20:
-        problems.append(("hungry", 20 - pet.hunger + 30))
+    if pet.energy <= 45:
+        problems.append(("tired", 45 - pet.energy + 45))
 
-    if pet.cleanliness <= 20:
-        problems.append(("dirty", 20 - pet.cleanliness + 25))
+    if pet.hunger <= 40:
+        problems.append(("hungry", 40 - pet.hunger + 40))
 
-    if pet.energy <= 20:
-        problems.append(("tired", 20 - pet.energy + 20))
+    if pet.cleanliness <= 40:
+        problems.append(("dirty", 40 - pet.cleanliness + 35))
 
-    if pet.happiness <= 25:
-        problems.append(("sad", 25 - pet.happiness + 10))
+    if pet.happiness <= 40:
+        problems.append(("sad", 40 - pet.happiness + 35))
 
     if problems:
         problems.sort(key=lambda item: item[1], reverse=True)
@@ -38,7 +36,7 @@ def get_mood(pet):
         pet.hunger >= 70
         and pet.happiness >= 70
         and pet.cleanliness >= 70
-        and pet.energy >= 50
+        and pet.energy >= 60
         and pet.health >= 70
     ):
         return "happy"
