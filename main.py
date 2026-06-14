@@ -5,7 +5,7 @@ import time
 
 from io_layer.windows_io import WindowsIO
 
-from pet.config import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_SIZE, FPS
+from pet.config import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_SIZE, FPS, WHISPLAY_FPS
 from pet.save import load_pet, save_pet
 from pet.logic import (
     apply_offline_progress,
@@ -136,6 +136,7 @@ def main():
     debug_mood_index = None
 
     last_save = time.time()
+    last_whisplay_flip = 0
 
     while io.running:
         dt = clock.tick(FPS) / 1000.0
@@ -232,9 +233,12 @@ def main():
         )
         
         if whisplay_display:
-            whisplay_display.flip(screen)
-        else:
-            pygame.display.flip()
+            now = time.time()
+            if now - last_whisplay_flip >= 1 / WHISPLAY_FPS:
+                whisplay_display.flip(screen)
+                last_whisplay_flip = now
+            else:
+                pygame.display.flip()
 
     save_pet(pet)
 
