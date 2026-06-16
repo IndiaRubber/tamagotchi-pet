@@ -152,6 +152,7 @@ def main():
     screen_dirty = True
 
     while io.running:
+        target_fps = WHISPLAY_FPS if getattr(io, "screen_sleeping", False) else FPS
         dt = clock.tick(FPS) / 1000.0
 
         actions = io.poll_events()
@@ -240,7 +241,11 @@ def main():
         if time.time() - last_save > 5:
             save_pet(pet)
             last_save = time.time()
-
+            
+        if getattr(io, "screen_sleeping", False):
+            screen_dirty = True
+            continue
+            
         debug_mood = DEBUG_MOODS[debug_mood_index] if debug_mood_index is not None else None
 
         if whisplay_display:
